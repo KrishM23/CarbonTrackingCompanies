@@ -48,32 +48,15 @@ Open **http://localhost:5173** and sign in with `demo@acme.corp` / `demo1234`.
 
 ## Deploy (Netlify)
 
-The UI and API both run on Netlify:
+1. Import the GitHub repo in Netlify
+2. Leave **Base directory empty** (repo root)
+3. Deploy (settings come from `netlify.toml`)
 
-- **Frontend:** static build from `frontend/`
-- **API:** Python serverless function at `/api/*` (FastAPI + SQLite in `/tmp`)
+`VITE_DEMO_MODE=true` is set for Netlify builds, so **demo@acme.corp / demo1234** works without a separate API server.
 
-### Important site settings
-
-In Netlify → Site configuration → Build & deploy → Build settings:
-
-- **Base directory:** leave **empty** (repo root). Do **not** set it to `frontend`.
-- Build command / publish dir are taken from `netlify.toml`.
-
-Then **Clear cache and deploy site**.
-
-### Try it
-
-1. Open the site → `/login`
-2. Demo: `demo@acme.corp` / `demo1234`
-
-Notes:
-
-- First request after idle can be slow (cold start)
-- Demo data is re-seeded on cold starts; `/tmp` SQLite is ephemeral on free functions
-- Local API still: `uvicorn app.main:app --reload --host 127.0.0.1 --port 8002`
-
-Optional fallback: `render.yaml` can host the API on Render if your Netlify plan cannot run Python functions.
+Optional later: host the FastAPI backend (see `render.yaml`) and set:
+- `VITE_DEMO_MODE=false`
+- `VITE_API_URL=https://your-api.onrender.com`
 
 For Postgres locally (optional): `pip install -r requirements-postgres.txt` and set `DATABASE_URL=postgresql://carbon:carbon@localhost:5432/carbontrack`.
 

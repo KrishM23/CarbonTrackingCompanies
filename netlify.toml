@@ -1,23 +1,13 @@
-# Build frontend and vendor backend code into the function bundle
+# Vapor on Netlify: static frontend with built-in demo mode
+# (Python serverless APIs are unreliable on free Netlify plans)
+
 [build]
-  command = "npm --prefix frontend ci && npm --prefix frontend run build && rm -rf netlify/functions/app && cp -R backend/app netlify/functions/app && pip install -r netlify/functions/requirements.txt"
+  command = "npm --prefix frontend ci && npm --prefix frontend run build"
   publish = "frontend/dist"
-  functions = "netlify/functions"
 
 [build.environment]
-  PYTHON_VERSION = "3.12"
-  SEED_ON_START = "1"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "none"
-
-# API → serverless FastAPI (must be before SPA fallback)
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-  force = true
+  # Demo account works fully without a separate API host
+  VITE_DEMO_MODE = "true"
 
 # SPA client routes
 [[redirects]]

@@ -1,3 +1,5 @@
+import { demoApi, enableDemoMode, shouldUseDemoApi } from "./demo/demoApi";
+
 export type Company = {
   id: number;
   name: string;
@@ -197,6 +199,7 @@ export type ScenarioPreset = {
 
 const TOKEN_KEY = "vapor_token";
 const LEGACY_TOKEN_KEY = "carbontrack_token";
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") || "";
 
 export function getToken(): string | null {
   const current = localStorage.getItem(TOKEN_KEY);
@@ -218,6 +221,7 @@ export function setToken(token: string) {
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(LEGACY_TOKEN_KEY);
+  localStorage.removeItem("vapor_demo_mode");
 }
 
 function friendlyField(loc: unknown): string {
@@ -276,10 +280,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   let res: Response;
   try {
-    res = await fetch(path, { ...options, headers });
+    res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   } catch {
     throw new Error(
-      "Cannot reach the Vapor API. If you're on the live site, wait a few seconds and try again (the API may be waking up)."
+      "Cannot reach the Vapor API. If you're on the live site, use the demo account or try again in a moment."
     );
   }
 
@@ -298,14 +302,17 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         body = await res.json();
       } else {
         const text = await res.text();
+        // Netlify often returns HTML when /api isn't wired
+        if (ctype.includes("text/html") || text.trim().startsWith("<!")) {
+          throw new Error("API_UNAVAILABLE");
+        }
         if (text.includes("Unsupported method")) {
-          throw new Error(
-            "The API proxy is misconfigured. Restart the frontend after ensuring the backend is on port 8002."
-          );
+          throw new Error("API_UNAVAILABLE");
         }
       }
     } catch (err) {
-      if (err instanceof Error && err.message.includes("API proxy")) throw err;
+      if (err instanceof Error && err.message === "API_UNAVAILABLE") throw err;
+      if (err instanceof Error && err.message.includes("API")) throw err;
     }
     throw new Error(formatApiError(res.status, res.statusText, body));
   }
@@ -317,43 +324,127 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
+async function withDemoFallback<T>(
+  live: () => Promise<T>,
+  demo: () => Promise<T>,
+  opts?: { forceDemoOnFail?: boolean }
+): Promise<T> {
+  if (shouldUseDemoApi(getToken())) return demo();
+  try {
+    return await live();
+  } catch (err) {
+    if (opts?.forceDemoOnFail) {
+      enableDemoMode();
+      return demo();
+    }
+    throw err;
+  }
+}
+
 export const api = {
   signup: (body: Record<string, unknown>) =>
-    request<{ access_token: string }>("/api/auth/signup", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
-  login: (email: string, password: string) =>
-    request<{ access_token: string }>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    }),
-  me: () => request<{ user: User; company: Company }>("/api/auth/me"),
-  updateCompany: (body: Partial<Company>) =>
-    request<Company>("/api/company", { method: "PATCH", body: JSON.stringify(body) }),
-  listEmissions: () => request<EmissionsRecord[]>("/api/emissions"),
-  upsertEmissions: (body: Omit<EmissionsRecord, "id" | "total"> & { total?: number }) =>
-    request<EmissionsRecord>("/api/emissions", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
-  deleteEmissions: (year: number) =>
-    request<{ ok: boolean }>(`/api/emissions/${year}`, { method: "DELETE" }),
-  importCsv: (file: File) => {
-    const fd = new FormData();
-    fd.append("file", file);
-    return request<EmissionsRecord[]>("/api/emissions/csv", { method: "POST", body: fd });
+    withDemoFallback(
+      () =>
+        request<{ access_token: string }>("/api/auth/signup", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
+      () => demoApi.signup(body),
+      { forceDemoOnFail: true }
+    ),
+  login: async (email: string, password: string) => {
+    // Prefer local demo credentials on Netlify / when API is down
+    if (email.trim().toLowerCase() === "demo@acme.corp" && password === "demo1234") {
+      if (import.meta.env.VITE_DEMO_MODE === "true" || shouldUseDemoApi()) {
+        return demoApi.login(email, password);
+      }
+      try {
+        return await request<{ access_token: string }>("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        });
+      } catch {
+        return demoApi.login(email, password);
+      }
+    }
+    return withDemoFallback(
+      () =>
+        request<{ access_token: string }>("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        }),
+      async () => {
+        throw new Error("Invalid email or password.");
+      }
+    );
   },
-  dashboard: () => request<DashboardData>("/api/dashboard"),
+  me: () =>
+    withDemoFallback(
+      () => request<{ user: User; company: Company }>("/api/auth/me"),
+      () => demoApi.me()
+    ),
+  updateCompany: (body: Partial<Company>) =>
+    withDemoFallback(
+      () => request<Company>("/api/company", { method: "PATCH", body: JSON.stringify(body) }),
+      () => demoApi.updateCompany(body)
+    ),
+  listEmissions: () =>
+    withDemoFallback(
+      () => request<EmissionsRecord[]>("/api/emissions"),
+      () => demoApi.listEmissions()
+    ),
+  upsertEmissions: (body: Omit<EmissionsRecord, "id" | "total"> & { total?: number }) =>
+    withDemoFallback(
+      () =>
+        request<EmissionsRecord>("/api/emissions", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
+      () => demoApi.upsertEmissions(body)
+    ),
+  deleteEmissions: (year: number) =>
+    withDemoFallback(
+      () => request<{ ok: boolean }>(`/api/emissions/${year}`, { method: "DELETE" }),
+      () => demoApi.deleteEmissions(year)
+    ),
+  importCsv: (file: File) =>
+    withDemoFallback(
+      () => {
+        const fd = new FormData();
+        fd.append("file", file);
+        return request<EmissionsRecord[]>("/api/emissions/csv", { method: "POST", body: fd });
+      },
+      () => demoApi.importCsv(file)
+    ),
+  dashboard: () =>
+    withDemoFallback(
+      () => request<DashboardData>("/api/dashboard"),
+      () => demoApi.dashboard()
+    ),
   runScenario: (levers: Levers) =>
-    request<ScenarioResult>("/api/scenarios/run", {
-      method: "POST",
-      body: JSON.stringify(levers),
-    }),
+    withDemoFallback(
+      () =>
+        request<ScenarioResult>("/api/scenarios/run", {
+          method: "POST",
+          body: JSON.stringify(levers),
+        }),
+      () => demoApi.runScenario(levers)
+    ),
   scenarioMeta: () =>
-    request<{ lever_defs: LeverDef[]; presets: ScenarioPreset[] }>("/api/scenarios/meta"),
-  insights: () => request<Insights>("/api/insights"),
-  listSavedScenarios: () => request<SavedScenario[]>("/api/scenarios/saved"),
+    withDemoFallback(
+      () => request<{ lever_defs: LeverDef[]; presets: ScenarioPreset[] }>("/api/scenarios/meta"),
+      () => demoApi.scenarioMeta() as Promise<{ lever_defs: LeverDef[]; presets: ScenarioPreset[] }>
+    ),
+  insights: () =>
+    withDemoFallback(
+      () => request<Insights>("/api/insights"),
+      () => demoApi.insights()
+    ),
+  listSavedScenarios: () =>
+    withDemoFallback(
+      () => request<SavedScenario[]>("/api/scenarios/saved"),
+      () => demoApi.listSavedScenarios()
+    ),
   saveScenario: (body: {
     name: string;
     notes?: string;
@@ -362,14 +453,24 @@ export const api = {
     scope3_cut: number;
     ramp_years: number;
   }) =>
-    request<SavedScenario>("/api/scenarios/saved", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
+    withDemoFallback(
+      () =>
+        request<SavedScenario>("/api/scenarios/saved", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
+      () => demoApi.saveScenario(body)
+    ),
   deleteSavedScenario: (id: number) =>
-    request<{ ok: boolean }>(`/api/scenarios/saved/${id}`, { method: "DELETE" }),
+    withDemoFallback(
+      () => request<{ ok: boolean }>(`/api/scenarios/saved/${id}`, { method: "DELETE" }),
+      () => demoApi.deleteSavedScenario(id)
+    ),
   downloadPdf: async () => {
-    const blob = await request<Blob>("/api/reports/pdf");
+    const blob = await withDemoFallback(
+      () => request<Blob>("/api/reports/pdf"),
+      () => demoApi.downloadPdf()
+    );
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
