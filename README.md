@@ -46,6 +46,19 @@ Open **http://localhost:5173** and sign in with `demo@acme.corp` / `demo1234`.
 
 > **Note:** The API runs on **port 8002** by default (avoids conflicts with other local projects). Vite proxies `/api` → `127.0.0.1:8002`.
 
+## Deploy frontend (Netlify)
+
+This repo is a monorepo. Netlify must build the `frontend` folder:
+
+1. Connect the GitHub repo at [Netlify](https://app.netlify.com)
+2. Settings should match `netlify.toml` (already in the repo):
+   - **Base directory:** `frontend`
+   - **Build command:** `npm run build`
+   - **Publish directory:** `dist`
+3. Trigger a redeploy after pulling latest `main`
+
+The site is static UI only. API calls still need a hosted backend (or they’ll fail until you point `VITE_API_PROXY` / an env-based API URL at your FastAPI server).
+
 For Postgres locally (optional): `pip install -r requirements-postgres.txt` and set `DATABASE_URL=postgresql://carbon:carbon@localhost:5432/carbontrack`.
 
 ```bash
