@@ -19,3 +19,4 @@ frontend/dist/
 .netlify/
 netlify/functions/app/
 
+tsconfig.tsbuildinfo
