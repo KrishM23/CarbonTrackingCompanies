@@ -279,7 +279,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     res = await fetch(path, { ...options, headers });
   } catch {
     throw new Error(
-      "Cannot reach the Vapor API. Confirm the backend is running (port 8002) and refresh."
+      "Cannot reach the Vapor API. If you're on the live site, wait a few seconds and try again (the API may be waking up)."
     );
   }
 

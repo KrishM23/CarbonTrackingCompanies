@@ -1262,9 +1262,10 @@ table.data tr:hover td { background: rgba(255,255,255,0.02); }
   font-size: clamp(1.8rem, 3.5vw, 2.6rem);
   font-weight: 600;
   letter-spacing: -0.03em;
-  line-height: 1.15;
+  line-height: 1.35;
   margin-bottom: 14px;
-  max-width: 16ch;
+  max-width: none;
+  overflow: visible;
 }
 .contact-lead {
   color: var(--text-2);

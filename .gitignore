@@ -16,4 +16,6 @@ frontend/dist/
 .mypy_cache/
 .cursor/
 *.log
-.python-version
+.netlify/
+netlify/functions/app/
+

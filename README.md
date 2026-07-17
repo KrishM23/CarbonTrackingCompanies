@@ -46,18 +46,34 @@ Open **http://localhost:5173** and sign in with `demo@acme.corp` / `demo1234`.
 
 > **Note:** The API runs on **port 8002** by default (avoids conflicts with other local projects). Vite proxies `/api` → `127.0.0.1:8002`.
 
-## Deploy frontend (Netlify)
+## Deploy (Netlify)
 
-This repo is a monorepo. Netlify must build the `frontend` folder:
+The UI and API both run on Netlify:
 
-1. Connect the GitHub repo at [Netlify](https://app.netlify.com)
-2. Settings should match `netlify.toml` (already in the repo):
-   - **Base directory:** `frontend`
-   - **Build command:** `npm run build`
-   - **Publish directory:** `dist`
-3. Trigger a redeploy after pulling latest `main`
+- **Frontend:** static build from `frontend/`
+- **API:** Python serverless function at `/api/*` (FastAPI + SQLite in `/tmp`)
 
-The site is static UI only. API calls still need a hosted backend (or they’ll fail until you point `VITE_API_PROXY` / an env-based API URL at your FastAPI server).
+### Important site settings
+
+In Netlify → Site configuration → Build & deploy → Build settings:
+
+- **Base directory:** leave **empty** (repo root). Do **not** set it to `frontend`.
+- Build command / publish dir are taken from `netlify.toml`.
+
+Then **Clear cache and deploy site**.
+
+### Try it
+
+1. Open the site → `/login`
+2. Demo: `demo@acme.corp` / `demo1234`
+
+Notes:
+
+- First request after idle can be slow (cold start)
+- Demo data is re-seeded on cold starts; `/tmp` SQLite is ephemeral on free functions
+- Local API still: `uvicorn app.main:app --reload --host 127.0.0.1 --port 8002`
+
+Optional fallback: `render.yaml` can host the API on Render if your Netlify plan cannot run Python functions.
 
 For Postgres locally (optional): `pip install -r requirements-postgres.txt` and set `DATABASE_URL=postgresql://carbon:carbon@localhost:5432/carbontrack`.
 

@@ -1,0 +1,22 @@
+# Optional: host API on Render if Netlify functions are limited on your plan.
+# Dashboard → New → Blueprint → connect this repo.
+
+services:
+  - type: web
+    name: vapor-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: SEED_ON_START
+        value: "1"
+      - key: DATABASE_URL
+        value: sqlite:///./carbontrack.db

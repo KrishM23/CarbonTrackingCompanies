@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,17 +11,27 @@ from app.routers import analytics, auth, company, emissions, reports
 Base.metadata.create_all(bind=engine)
 migrate()
 
+if os.environ.get("SEED_ON_START", "1") == "1":
+    try:
+        from app.seed import seed
+
+        seed()
+    except Exception as exc:  # pragma: no cover - startup resilience
+        print(f"Seed skipped: {exc}")
+
 app = FastAPI(
     title="Vapor API",
     description="B2B carbon/ESG tracking — forecast, simulate, roadmap, report",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+# Allow all when "*" present (Netlify preview URLs vary)
+allow_all = "*" in origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins or ["*"],
-    allow_credentials=True,
+    allow_origins=["*"] if allow_all else origins,
+    allow_credentials=not allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )

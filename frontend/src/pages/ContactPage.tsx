@@ -21,7 +21,7 @@ export function ContactPage() {
       <main className="contact-main">
         <div className="contact-copy">
           <p className="contact-eyebrow">Contact</p>
-          <h1>Talk to the person building Vapor</h1>
+          <h1>Meet Vapor&apos;s founder</h1>
           <p className="contact-lead">
             Questions about a pilot, a demo for your company, or how Scope 1, 2, and 3 fit your
             reporting? Reach out directly.
