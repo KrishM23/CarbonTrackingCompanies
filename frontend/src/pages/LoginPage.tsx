@@ -51,9 +51,6 @@ export function LoginPage() {
           <a className="landing-link" href="#how">
             How it works
           </a>
-          <a className="landing-link" href="#engine">
-            Forecast &amp; simulator
-          </a>
           <Link className="landing-link" to="/contact">
             Contact
           </Link>
@@ -182,37 +179,6 @@ export function LoginPage() {
                 those choices across scopes (so cutting fuel does not pretend electricity stays
                 free), shows the new path next to the forecast, and lets you save board options or
                 export a PDF.
-              </p>
-            </article>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="landing-engine" id="engine">
-        <Reveal>
-          <h2>Under the hood, still readable</h2>
-          <p className="landing-scopes-intro">
-            Built for people who need a defensible number, not a black box slide.
-          </p>
-        </Reveal>
-        <div className="engine-grid">
-          <Reveal delayMs={50}>
-            <article className="engine-card">
-              <h3>ML model ensemble</h3>
-              <p>
-                Several forecasting models compete on your history. The ones that predict held-out
-                years best get more weight. The result is a median path plus a range, so you can say
-                “likely” instead of “we drew a line in Excel.”
-              </p>
-            </article>
-          </Reveal>
-          <Reveal delayMs={110}>
-            <article className="engine-card">
-              <h3>Intervention simulator</h3>
-              <p>
-                This is where strategy gets cheap to test. Turn up clean power, fleet electrification,
-                or travel cuts and watch Scope 1, 2, and 3 move together. Compare scenarios side by
-                side before you commit capital.
               </p>
             </article>
           </Reveal>
