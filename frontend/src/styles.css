@@ -1173,6 +1173,39 @@ table.data tr:hover td { background: rgba(255,255,255,0.02); }
   line-height: 1.55;
 }
 
+.landing-engine {
+  position: relative;
+  z-index: 2;
+  padding: 64px clamp(20px, 5vw, 56px) 72px;
+  max-width: 980px;
+  border-top: 1px solid var(--line);
+}
+.landing-engine h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+.engine-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 28px;
+}
+.engine-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.engine-card p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
 .scope-explain {
   display: grid;
   gap: 0;
@@ -1387,6 +1420,7 @@ table.data tr:hover td { background: rgba(255,255,255,0.02); }
   }
   .hero-visual { width: min(100%, 340px); }
   .how-steps { grid-template-columns: 1fr; gap: 18px; }
+  .engine-grid { grid-template-columns: 1fr; gap: 20px; }
 }
 
 @media (max-width: 800px) {

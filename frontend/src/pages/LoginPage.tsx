@@ -51,6 +51,9 @@ export function LoginPage() {
           <a className="landing-link" href="#how">
             How it works
           </a>
+          <a className="landing-link" href="#engine">
+            Forecast &amp; simulator
+          </a>
           <Link className="landing-link" to="/contact">
             Contact
           </Link>
@@ -67,8 +70,9 @@ export function LoginPage() {
             See where your carbon comes from, and whether your goal is realistic.
           </p>
           <p className="landing-lead hero-line" style={{ animationDelay: "0.55s" }}>
-            Most teams only see a spreadsheet once a year. Vapor turns those numbers into a clear path
-            forward: what you emitted, what you promised, and what has to change.
+            Most teams only see a spreadsheet once a year. Vapor runs an ensemble of forecasting
+            models on your inventory, then lets you stress-test the future in a what-if simulator
+            before you spend money or promise the board a number.
           </p>
           <div className="landing-cta hero-line" style={{ animationDelay: "0.7s" }}>
             <a className="btn btn-primary" href="#signin">
@@ -142,7 +146,8 @@ export function LoginPage() {
         <Reveal>
           <h2>How it works</h2>
           <p className="landing-scopes-intro">
-            Three steps. No jargon required.
+            Inventory in. Ensemble forecast out. Simulator in between when you want to change the
+            path.
           </p>
         </Reveal>
         <div className="how-steps">
@@ -159,20 +164,55 @@ export function LoginPage() {
           <Reveal delayMs={90}>
             <article className="how-step">
               <div className="how-step-num">2</div>
-              <h3>See if you are on track</h3>
+              <h3>Ensemble forecast vs your goal</h3>
               <p>
-                Set a reduction goal (for example, cut 50% by 2035). Vapor forecasts your path and
-                shows whether you are likely to hit it.
+                Vapor does not trust one trend line. It trains several models (linear, weighted,
+                curve fits, Holt smoothing, ridge), checks each one with leave-one-out testing, then
+                blends the winners into one path with uncertainty bands. You see if you are on track
+                for the cut you promised.
               </p>
             </article>
           </Reveal>
           <Reveal delayMs={140}>
             <article className="how-step">
               <div className="how-step-num">3</div>
-              <h3>Try changes, then share</h3>
+              <h3>What-if simulator</h3>
               <p>
-                Test ideas like cleaner power or less travel. Save the options that work, and export a
-                PDF your board or customers can read.
+                Move levers for electrification, cleaner power, and travel. The simulator couples
+                those choices across scopes (so cutting fuel does not pretend electricity stays
+                free), shows the new path next to the forecast, and lets you save board options or
+                export a PDF.
+              </p>
+            </article>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="landing-engine" id="engine">
+        <Reveal>
+          <h2>Under the hood, still readable</h2>
+          <p className="landing-scopes-intro">
+            Built for people who need a defensible number, not a black box slide.
+          </p>
+        </Reveal>
+        <div className="engine-grid">
+          <Reveal delayMs={50}>
+            <article className="engine-card">
+              <h3>ML model ensemble</h3>
+              <p>
+                Several forecasting models compete on your history. The ones that predict held-out
+                years best get more weight. The result is a median path plus a range, so you can say
+                “likely” instead of “we drew a line in Excel.”
+              </p>
+            </article>
+          </Reveal>
+          <Reveal delayMs={110}>
+            <article className="engine-card">
+              <h3>Intervention simulator</h3>
+              <p>
+                This is where strategy gets cheap to test. Turn up clean power, fleet electrification,
+                or travel cuts and watch Scope 1, 2, and 3 move together. Compare scenarios side by
+                side before you commit capital.
               </p>
             </article>
           </Reveal>
