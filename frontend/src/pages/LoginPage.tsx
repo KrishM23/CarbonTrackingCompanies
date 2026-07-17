@@ -48,6 +48,9 @@ export function LoginPage() {
           <a className="landing-link" href="#scopes">
             What we measure
           </a>
+          <a className="landing-link" href="#how">
+            How it works
+          </a>
           <Link className="landing-link" to="/contact">
             Contact
           </Link>
@@ -130,6 +133,47 @@ export function LoginPage() {
                   Often the biggest number, and the hardest to pin down.
                 </p>
               </div>
+            </article>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="landing-how" id="how">
+        <Reveal>
+          <h2>How it works</h2>
+          <p className="landing-scopes-intro">
+            Three steps. No jargon required.
+          </p>
+        </Reveal>
+        <div className="how-steps">
+          <Reveal delayMs={40}>
+            <article className="how-step">
+              <div className="how-step-num">1</div>
+              <h3>Enter your yearly numbers</h3>
+              <p>
+                Add what your company emitted each year for Scope 1, 2, and 3, or upload a simple CSV.
+                That becomes your inventory.
+              </p>
+            </article>
+          </Reveal>
+          <Reveal delayMs={90}>
+            <article className="how-step">
+              <div className="how-step-num">2</div>
+              <h3>See if you are on track</h3>
+              <p>
+                Set a reduction goal (for example, cut 50% by 2035). Vapor forecasts your path and
+                shows whether you are likely to hit it.
+              </p>
+            </article>
+          </Reveal>
+          <Reveal delayMs={140}>
+            <article className="how-step">
+              <div className="how-step-num">3</div>
+              <h3>Try changes, then share</h3>
+              <p>
+                Test ideas like cleaner power or less travel. Save the options that work, and export a
+                PDF your board or customers can read.
+              </p>
             </article>
           </Reveal>
         </div>
