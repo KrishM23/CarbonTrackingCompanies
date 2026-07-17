@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api, type Company } from "../api";
 import { useAuth } from "../AuthContext";
+import { FRAMEWORKS, INDUSTRIES } from "../constants";
 
 export function SettingsPage() {
   const { company, refresh } = useAuth();
@@ -66,10 +67,10 @@ export function SettingsPage() {
     <>
       <header className="page-head">
         <div className="eyebrow">Workspace</div>
-        <h2 style={{ fontWeight: 300 }}>Company & target</h2>
+        <h2 style={{ fontWeight: 300 }}>{company?.name || "Company"} & target</h2>
         <p>
-          Lock the baseline commitment and organizational context used for intensity metrics and
-          peer comparisons.
+          Lock the baseline commitment and organizational context used for intensity metrics, peer
+          bands, and board PDF exports.
         </p>
       </header>
 
@@ -88,11 +89,22 @@ export function SettingsPage() {
           <div className="grid-2">
             <div className="field">
               <label>Industry</label>
-              <input
-                value={form.industry}
+              <select
+                value={
+                  INDUSTRIES.includes(form.industry as (typeof INDUSTRIES)[number])
+                    ? form.industry
+                    : form.industry || "Other"
+                }
                 onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                placeholder="Industrial goods"
-              />
+              >
+                {!INDUSTRIES.includes(form.industry as (typeof INDUSTRIES)[number]) &&
+                  form.industry && <option value={form.industry}>{form.industry}</option>}
+                {INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind}>
+                    {ind}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="field">
               <label>HQ country</label>
@@ -129,10 +141,11 @@ export function SettingsPage() {
               value={form.framework}
               onChange={(e) => setForm({ ...form, framework: e.target.value })}
             >
-              <option>GHG Protocol</option>
-              <option>SBTi-aligned</option>
-              <option>ISO 14064</option>
-              <option>CDP-ready</option>
+              {FRAMEWORKS.map((fw) => (
+                <option key={fw} value={fw}>
+                  {fw}
+                </option>
+              ))}
             </select>
           </div>
           <div className="grid-3">

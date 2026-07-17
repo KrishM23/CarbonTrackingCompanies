@@ -1,6 +1,8 @@
-# CarbonTrack
+# Vapor
 
-B2B SaaS carbon/ESG tracking for mid-size companies. Adapted from **[Revitalize](../Carbon%20Trackers)** (UC campus emissions tracker): same 5-model ensemble forecasting with LOOCV prediction intervals, coupled what-if scenario simulator, and dashboard charts — re-scoped to a single company per account.
+B2B SaaS emissions intelligence for mid-size companies. Track Scope 1–3, forecast against your reduction target, run what-if scenarios, and export a company board PDF.
+
+Adapted from campus emissions research (ensemble forecasting + coupled scenario engine) — re-scoped to **one company per account**.
 
 ## MVP scope
 
@@ -9,7 +11,7 @@ B2B SaaS carbon/ESG tracking for mid-size companies. Adapted from **[Revitalize]
 - Custom reduction target (baseline year, target year, % cut)
 - Forecast vs. target with ensemble models + 95% intervals
 - What-if simulator: electrification, cleaner electricity, travel reduction
-- PDF progress report export
+- Company-branded PDF progress report
 - Basic JWT auth
 - **No billing** yet
 
@@ -19,7 +21,7 @@ B2B SaaS carbon/ESG tracking for mid-size companies. Adapted from **[Revitalize]
 |-------|------|
 | Frontend | React + Vite + TypeScript + Recharts |
 | Backend | FastAPI |
-| Engine | Python port of Revitalize `forecast.js` / `scenarios.js` |
+| Engine | Python ensemble forecast + coupled scenario simulator |
 | DB | Postgres (Docker) or SQLite (local default) |
 | Auth | JWT + bcrypt |
 
@@ -42,7 +44,7 @@ npm run dev
 
 Open **http://localhost:5173** and sign in with `demo@acme.corp` / `demo1234`.
 
-> **Note:** The API runs on **port 8002** by default in local scripts (8001/8000 may be occupied by other projects). Vite proxies `/api` → `127.0.0.1:8002`.
+> **Note:** The API runs on **port 8002** by default (avoids conflicts with other local projects). Vite proxies `/api` → `127.0.0.1:8002`.
 
 For Postgres locally (optional): `pip install -r requirements-postgres.txt` and set `DATABASE_URL=postgresql://carbon:carbon@localhost:5432/carbontrack`.
 
@@ -111,4 +113,4 @@ docker-compose.yml
 
 ## Disclaimer
 
-Inventory figures are company-entered. CarbonTrack does not independently verify emissions data. Forecasting and scenario outputs are decision-support estimates, not audited climate disclosures.
+Inventory figures are company-entered. Vapor does not independently verify emissions data. Forecasting and scenario outputs are decision-support estimates, not audited climate disclosures.

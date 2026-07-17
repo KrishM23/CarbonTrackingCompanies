@@ -10,7 +10,7 @@ Base.metadata.create_all(bind=engine)
 migrate()
 
 app = FastAPI(
-    title="CarbonTrack API",
+    title="Vapor API",
     description="B2B carbon/ESG tracking — forecast, simulate, roadmap, report",
     version="0.2.0",
 )
@@ -33,4 +33,4 @@ app.include_router(reports.router)
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "carbontrack", "version": "0.2.0"}
+    return {"status": "ok", "service": "vapor", "version": "0.3.0"}

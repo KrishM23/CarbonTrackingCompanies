@@ -70,10 +70,11 @@ export function DataPage() {
     <>
       <header className="page-head">
         <div className="eyebrow">Inventory</div>
-        <h2 style={{ fontWeight: 300 }}>Emissions data</h2>
+        <h2 style={{ fontWeight: 300 }}>Company emissions data</h2>
         <p>
-          Enter annual Scope 1–3 inventory in t CO₂e, or upload CSV (
-          <code>year,scope1,scope2,scope3</code>). Verified series unlock stronger forecasts.
+          Enter annual Scope 1, 2, and 3 inventory in t CO₂e, or upload CSV (
+          <code>year,scope1,scope2,scope3</code>). Verified years strengthen forecasts used in your
+          board PDF and customer questionnaires.
         </p>
       </header>
 

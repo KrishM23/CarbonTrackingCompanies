@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, fmtShort, type Insights } from "../api";
+import { useAuth } from "../AuthContext";
 
 export function RoadmapPage() {
+  const { company } = useAuth();
   const [insights, setInsights] = useState<Insights | null>(null);
   const [error, setError] = useState("");
 
@@ -34,10 +36,12 @@ export function RoadmapPage() {
     <>
       <header className="page-head">
         <div className="eyebrow">Decision support</div>
-        <h2 style={{ fontWeight: 300 }}>Roadmap & readiness</h2>
+        <h2 style={{ fontWeight: 300 }}>
+          {company?.name ? `${company.name} roadmap` : "Roadmap & readiness"}
+        </h2>
         <p>
-          Prioritized abatement actions, disclosure checklist, and data quality — the package
-          sustainability leads take to the board and buyers.
+          Prioritized abatement actions, disclosure checklist, and data quality. The package
+          sustainability leads take to the board and enterprise customers.
         </p>
       </header>
 
@@ -111,7 +115,7 @@ export function RoadmapPage() {
             <div key={phase} style={{ marginTop: 20 }}>
               <h4
                 style={{
-                  fontFamily: "var(--font-display)",
+                  fontWeight: 400,
                   fontSize: "1.05rem",
                   marginBottom: 10,
                 }}
@@ -128,12 +132,12 @@ export function RoadmapPage() {
                       </span>
                       <span className="pill neutral">{a.years}</span>
                     </div>
-                    <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.08rem" }}>
+                    <strong style={{ fontWeight: 500, fontSize: "1.08rem" }}>
                       {a.title}
                     </strong>
                     <p>{a.detail}</p>
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{ fontWeight: 700, color: "var(--accent-2)" }}>
+                      <span style={{ fontWeight: 600, color: "var(--green)" }}>
                         ~{fmtShort(a.impact_t)} t ({a.impact_pct}% of inventory)
                       </span>
                       <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
@@ -152,7 +156,7 @@ export function RoadmapPage() {
         <section className="panel">
           <h3>Peer intensity context</h3>
           <p className="panel-sub">
-            Illustrative mid-market band for {intensity.peer_label} — useful for RFP and customer
+            Illustrative mid-market band for {intensity.peer_label}. Useful for RFP and customer
             questionnaires, not a certified ranking.
           </p>
           <div className="grid-3">

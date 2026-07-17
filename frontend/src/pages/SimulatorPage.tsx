@@ -18,6 +18,7 @@ import {
   type ScenarioPreset,
   type ScenarioResult,
 } from "../api";
+import { useAuth } from "../AuthContext";
 
 const DEFAULT_LEVERS: Levers = {
   scope1_cut: 0,
@@ -27,6 +28,7 @@ const DEFAULT_LEVERS: Levers = {
 };
 
 export function SimulatorPage() {
+  const { company } = useAuth();
   const [levers, setLevers] = useState<Levers>(DEFAULT_LEVERS);
   const [presets, setPresets] = useState<ScenarioPreset[]>([]);
   const [defs, setDefs] = useState<LeverDef[]>([]);
@@ -109,10 +111,13 @@ export function SimulatorPage() {
     <>
       <header className="page-head">
         <div className="eyebrow">What-if lab</div>
-        <h2 style={{ fontWeight: 300 }}>Intervention simulator</h2>
+        <h2 style={{ fontWeight: 300 }}>
+          {company?.name ? `${company.name} simulator` : "Intervention simulator"}
+        </h2>
         <p>
-          Coupled Scope 1–3 scenario engine with load-shift rebound and capital-turnover S-curves.
-          Save board options side-by-side.
+          Coupled Scope 1, 2, and 3 scenario engine with load-shift rebound and capital-turnover
+          S-curves. Save board options side by side against your {company?.target_year ?? "target"}{" "}
+          commitment.
         </p>
       </header>
 
@@ -175,7 +180,7 @@ export function SimulatorPage() {
                   id="saveName"
                   value={saveName}
                   onChange={(e) => setSaveName(e.target.value)}
-                  placeholder="e.g. Board option A — electrify"
+                  placeholder="e.g. Board option A, electrify fleet"
                 />
               </div>
               <div className="actions">
@@ -260,28 +265,36 @@ export function SimulatorPage() {
               <section className="panel">
                 <h3>Trajectory</h3>
                 <p className="panel-sub">Trend, scenario path, and structural sensitivity band.</p>
-                <div className="chart-wrap">
+                <div className="chart-wrap tall">
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,28,24,0.08)" />
-                      <XAxis dataKey="year" tick={{ fill: "#667a72", fontSize: 12 }} />
+                    <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 28 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                      <XAxis dataKey="year" tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} />
                       <YAxis
                         tickFormatter={(v) => fmtShort(Number(v))}
-                        tick={{ fill: "#667a72", fontSize: 12 }}
+                        tick={{ fill: "#6b7280", fontSize: 11 }}
                         width={48}
+                        axisLine={false}
+                        tickLine={false}
                       />
                       <Tooltip
                         formatter={(v: number, name: string) => [`${fmtShort(v)} t`, name]}
+                        contentStyle={{
+                          background: "#16181f",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 12,
+                          fontSize: 12,
+                        }}
                       />
-                      <Legend />
-                      <Line type="monotone" dataKey="high" stroke="rgba(13,159,120,0.3)" dot={false} name="Optimistic" />
-                      <Line type="monotone" dataKey="low" stroke="rgba(13,159,120,0.3)" dot={false} name="Pessimistic" />
-                      <Line type="monotone" dataKey="baseline" stroke="#667a72" strokeWidth={2} dot={false} name="Trend" />
-                      <Line type="monotone" dataKey="scenario" stroke="#0d9f78" strokeWidth={2.5} dot={false} name="Scenario" />
+                      <Legend wrapperStyle={{ fontSize: 12, color: "#a8adb8" }} />
+                      <Line type="monotone" dataKey="high" stroke="rgba(61,214,140,0.3)" dot={false} name="Optimistic" />
+                      <Line type="monotone" dataKey="low" stroke="rgba(61,214,140,0.3)" dot={false} name="Pessimistic" />
+                      <Line type="monotone" dataKey="baseline" stroke="#6b7280" strokeWidth={2} dot={false} name="Trend" />
+                      <Line type="monotone" dataKey="scenario" stroke="#3dd68c" strokeWidth={2.5} dot={false} name="Scenario" />
                       <Line
                         type="monotone"
                         dataKey="commitment"
-                        stroke="#2a6f97"
+                        stroke="#5b8def"
                         strokeDasharray="6 4"
                         strokeWidth={1.5}
                         dot={false}
@@ -306,7 +319,7 @@ export function SimulatorPage() {
                     <p style={{ color: "var(--muted)", fontSize: "0.88rem", marginBottom: 8 }}>
                       S1 {s.scope1_cut}% · S2 {s.scope2_cut}% · S3 {s.scope3_cut}% · {s.ramp_years} yr
                     </p>
-                    <div className="value" style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem" }}>
+                    <div className="value" style={{ fontSize: "1.4rem", fontWeight: 300 }}>
                       {fmtShort(s.scenario_end)}
                       <span style={{ fontSize: "0.85rem", color: "var(--muted)", marginLeft: 6 }}>t</span>
                     </div>

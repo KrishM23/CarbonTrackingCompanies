@@ -195,18 +195,29 @@ export type ScenarioPreset = {
   levers: Levers;
 };
 
-const TOKEN_KEY = "carbontrack_token";
+const TOKEN_KEY = "vapor_token";
+const LEGACY_TOKEN_KEY = "carbontrack_token";
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  const current = localStorage.getItem(TOKEN_KEY);
+  if (current) return current;
+  const legacy = localStorage.getItem(LEGACY_TOKEN_KEY);
+  if (legacy) {
+    localStorage.setItem(TOKEN_KEY, legacy);
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+    return legacy;
+  }
+  return null;
 }
 
 export function setToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 function friendlyField(loc: unknown): string {
@@ -268,7 +279,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     res = await fetch(path, { ...options, headers });
   } catch {
     throw new Error(
-      "Cannot reach the CarbonTrack API. Confirm the backend is running (port 8002) and refresh."
+      "Cannot reach the Vapor API. Confirm the backend is running (port 8002) and refresh."
     );
   }
 
@@ -362,7 +373,7 @@ export const api = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "carbontrack-report.pdf";
+    a.download = "vapor-emissions-report.pdf";
     a.click();
     URL.revokeObjectURL(url);
   },

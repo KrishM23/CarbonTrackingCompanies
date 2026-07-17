@@ -1,21 +1,8 @@
 import { FormEvent, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-
-function LogoMark() {
-  return (
-    <div className="logo" aria-hidden>
-      <svg viewBox="0 0 24 24" fill="none">
-        <path
-          d="M12 3l2.2 6.2L20.5 11l-6.3 1.8L12 19l-2.2-6.2L3.5 11l6.3-1.8L12 3z"
-          stroke="#f4f5f7"
-          strokeWidth="1.4"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  );
-}
+import { BrandLogo } from "../components/BrandLogo";
+import { INDUSTRIES } from "../constants";
 
 export function SignupPage() {
   const { signup, user, loading } = useAuth();
@@ -24,7 +11,7 @@ export function SignupPage() {
     password: "",
     full_name: "",
     company_name: "",
-    industry: "",
+    industry: "Manufacturing",
     baseline_year: 2019,
     target_year: 2035,
     reduction_pct: 50,
@@ -76,10 +63,11 @@ export function SignupPage() {
   return (
     <div className="auth-page">
       <div className="auth-card wide">
-        <LogoMark />
-        <h1>Create workspace</h1>
+        <BrandLogo size="md" withWordmark />
+        <h1 className="auth-title">Set up your company workspace</h1>
         <p className="lead">
-          One company per account. Set your target — add inventory and run scenarios next.
+          One company per account. Start with your reduction target, then add yearly emissions and
+          run scenarios.
         </p>
         <form className="form" onSubmit={onSubmit} noValidate>
           {error && (
@@ -101,12 +89,17 @@ export function SignupPage() {
           <div className="grid-2">
             <div className="field">
               <label htmlFor="industry">Industry</label>
-              <input
+              <select
                 id="industry"
                 value={form.industry}
                 onChange={(e) => set("industry", e.target.value)}
-                placeholder="Industrial goods"
-              />
+              >
+                {INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind}>
+                    {ind}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="field">
               <label htmlFor="full_name">Your name</label>
@@ -115,6 +108,7 @@ export function SignupPage() {
                 value={form.full_name}
                 onChange={(e) => set("full_name", e.target.value)}
                 autoComplete="name"
+                placeholder="Sustainability / ops lead"
               />
             </div>
           </div>
@@ -127,6 +121,7 @@ export function SignupPage() {
               onChange={(e) => set("email", e.target.value)}
               required
               autoComplete="email"
+              placeholder="you@company.com"
             />
           </div>
           <div className="field">
@@ -192,7 +187,7 @@ export function SignupPage() {
             </div>
           </div>
           <button className="btn btn-primary" type="submit" disabled={busy}>
-            {busy ? "Creating…" : "Create workspace"}
+            {busy ? "Creating…" : "Create company workspace"}
           </button>
         </form>
         <p className="switch">

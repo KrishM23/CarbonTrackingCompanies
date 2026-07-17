@@ -35,11 +35,15 @@ export function DashboardPage() {
     }
   };
 
-  const goalPct = metrics?.pct_of_goal ?? 0;
+  const goalPct = Math.min(100, Math.max(0, metrics?.pct_of_goal ?? 0));
   const quality = insights?.quality.score ?? 0;
   const attain =
     forecast.attainment_prob != null ? Math.round(forecast.attainment_prob * 1000) / 10 : 0;
   const intensityBetter = insights?.intensity.better_than_peer;
+  const profileGaps: string[] = [];
+  if (!company.employee_count) profileGaps.push("headcount");
+  if (!company.annual_revenue_m) profileGaps.push("revenue");
+  if (!company.industry) profileGaps.push("industry");
 
   const totalScope =
     (metrics?.scope.scope1 || 0) + (metrics?.scope.scope2 || 0) + (metrics?.scope.scope3 || 0) || 1;
@@ -54,14 +58,15 @@ export function DashboardPage() {
             </svg>
           </button>
           <div>
-            <h1>Emissions Control Center</h1>
+            <h1>{company.name}</h1>
             <div className="sub">
-              {company.name}
-              {company.industry ? ` · ${company.industry}` : ""} · Scope 1–3 intelligence
+              Emissions control center
+              {company.industry ? ` · ${company.industry}` : ""}
+              {company.hq_country ? ` · ${company.hq_country}` : ""} · Scopes 1, 2 & 3
             </div>
           </div>
         </div>
-        <div className="seg-toggle" role="tablist">
+        <div className="seg-toggle" role="tablist" aria-label="Focus panel">
           {(
             [
               ["trajectory", "Trajectory"],
@@ -73,6 +78,8 @@ export function DashboardPage() {
             <button
               key={id}
               type="button"
+              role="tab"
+              aria-selected={seg === id}
               className={seg === id ? "active" : ""}
               onClick={() => setSeg(id)}
             >
@@ -83,25 +90,42 @@ export function DashboardPage() {
       </div>
 
       {needsData ? (
-        <div className="card">
-          <h3 style={{ fontWeight: 400, marginBottom: 8 }}>Finish setup</h3>
+        <div className="card setup-card">
+          <h3 style={{ fontWeight: 400, marginBottom: 8 }}>Finish {company.name}&apos;s setup</h3>
           <p style={{ color: "var(--muted)", marginBottom: 16 }}>
-            Add at least two inventory years to unlock the control center.
+            Add at least two inventory years to unlock forecasts, peer intensity, and board PDF
+            export.
           </p>
-          <div className="actions" style={{ marginTop: 0 }}>
+          <ol className="setup-steps">
+            <li>Confirm baseline, target year, and reduction % in Settings</li>
+            <li>Enter annual Scope 1, 2, and 3 inventory (or upload CSV)</li>
+            <li>Run a what-if scenario and export the company PDF</li>
+          </ol>
+          <div className="actions" style={{ marginTop: 16 }}>
             <Link className="btn btn-primary" to="/data">
               Add inventory
             </Link>
             <Link className="btn btn-secondary" to="/settings">
-              Target settings
+              Company & target
             </Link>
           </div>
         </div>
       ) : (
+        <>
+          {profileGaps.length > 0 && (
+            <div className="profile-banner">
+              <span>
+                Add {profileGaps.join(", ")} in Settings to unlock peer intensity for {company.name}.
+              </span>
+              <Link className="btn btn-secondary" to="/settings">
+                Complete profile
+              </Link>
+            </div>
+          )}
         <div className="dash-layout">
           <div className="dash-main">
             <div className="kpi-grid">
-              <div className="card bento-kpi">
+              <div className="card">
                 <div className="card-head">
                   <div>
                     <div className="card-label">Latest inventory</div>
@@ -110,12 +134,12 @@ export function DashboardPage() {
                       <span>t</span>
                     </div>
                   </div>
-                  <button className="card-arrow" type="button" onClick={() => navigate("/data")}>
+                  <button className="card-arrow" type="button" onClick={() => navigate("/data")} aria-label="Open inventory">
                     ↗
                   </button>
                 </div>
               </div>
-              <div className="card bento-kpi">
+              <div className="card">
                 <div className="card-head">
                   <div>
                     <div className="card-label">{company.target_year} forecast</div>
@@ -124,12 +148,12 @@ export function DashboardPage() {
                       <span>t</span>
                     </div>
                   </div>
-                  <button className="card-arrow" type="button" onClick={() => navigate("/simulator")}>
+                  <button className="card-arrow" type="button" onClick={() => navigate("/simulator")} aria-label="Open simulator">
                     ↗
                   </button>
                 </div>
               </div>
-              <div className="card bento-kpi">
+              <div className="card">
                 <div className="card-head">
                   <div>
                     <div className="card-label">Data quality</div>
@@ -138,7 +162,7 @@ export function DashboardPage() {
                       <span>/100</span>
                     </div>
                   </div>
-                  <button className="card-arrow" type="button" onClick={() => navigate("/roadmap")}>
+                  <button className="card-arrow" type="button" onClick={() => navigate("/roadmap")} aria-label="Open roadmap">
                     ↗
                   </button>
                 </div>
@@ -146,7 +170,7 @@ export function DashboardPage() {
             </div>
 
             <div className="chart-grid">
-              <div className="card bento-chart">
+              <div className="card chart-card">
                 <div className="card-head">
                   <div>
                     <div className="card-label">Emissions trajectory</div>
@@ -169,7 +193,7 @@ export function DashboardPage() {
                   compact
                 />
               </div>
-              <div className="card bento-chart">
+              <div className="card chart-card">
                 <div className="card-head">
                   <div>
                     <div className="card-label">Scope flow analysis</div>
@@ -184,21 +208,21 @@ export function DashboardPage() {
             </div>
 
             <div className="gauge-grid">
-              <div className="card bento-gauge">
+              <div className="card gauge-card">
                 <Gauge
-                  value={Math.min(100, Math.max(0, goalPct))}
+                  value={goalPct}
                   label="Goal progress"
                   color={goalPct >= 70 ? "green" : goalPct >= 40 ? "amber" : "orange"}
                 />
               </div>
-              <div className="card bento-gauge">
+              <div className="card gauge-card">
                 <Gauge
                   value={quality}
                   label="Disclosure readiness"
                   color={quality >= 75 ? "green" : quality >= 50 ? "amber" : "orange"}
                 />
               </div>
-              <div className="card bento-gauge">
+              <div className="card gauge-card">
                 <Gauge
                   value={attain}
                   label={`${company.target_year} attainment`}
@@ -208,16 +232,16 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <aside className="card bento-side">
-            <div className="bento-side-inner">
+          <aside className="card side-panel">
+            <div className="side-panel-scroll">
               <div className="card-label">Focus panel</div>
-              <h3>
+              <h3 className="side-title">
                 {seg === "trajectory" && "Forecast vs target"}
                 {seg === "scopes" && "Scope breakdown"}
                 {seg === "intensity" && "Carbon intensity"}
                 {seg === "actions" && "Priority actions"}
               </h3>
-              <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginBottom: 8 }}>
+              <p className="side-copy">
                 {seg === "trajectory" &&
                   (insights?.headlines[0] || "Ensemble path against your reduction commitment.")}
                 {seg === "scopes" && `Inventory mix for ${metrics?.latest.year ?? "latest year"}.`}
@@ -243,7 +267,7 @@ export function DashboardPage() {
                       <div className="scope-track">
                         <div
                           className={`scope-fill ${s.key}`}
-                          style={{ width: `${(s.val / totalScope) * 100}%` }}
+                          style={{ width: `${Math.min(100, (s.val / totalScope) * 100)}%` }}
                         />
                       </div>
                     </div>
@@ -251,36 +275,46 @@ export function DashboardPage() {
                 </div>
               )}
 
-              {seg === "intensity" && insights?.intensity && (
-                <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-                  <div className="card" style={{ background: "rgba(255,255,255,0.03)" }}>
-                    <div className="card-label">Per employee</div>
-                    <div className="card-metric" style={{ fontSize: "1.6rem" }}>
-                      {insights.intensity.per_employee ?? "—"}
-                      <span>t</span>
-                    </div>
-                  </div>
-                  <div className="card" style={{ background: "rgba(255,255,255,0.03)" }}>
-                    <div className="card-label">Per $M revenue</div>
-                    <div className="card-metric" style={{ fontSize: "1.6rem" }}>
-                      {insights.intensity.per_revenue_m ?? "—"}
-                      <span>t</span>
-                    </div>
-                    {insights.intensity.vs_peer_pct != null && (
-                      <span
-                        className={`pill ${intensityBetter ? "on" : "off"}`}
-                        style={{ marginTop: 8 }}
-                      >
-                        {intensityBetter ? "" : "+"}
-                        {insights.intensity.vs_peer_pct}% vs peers
-                      </span>
-                    )}
-                  </div>
+              {seg === "intensity" && (
+                <div className="side-stack">
+                  {insights?.intensity ? (
+                    <>
+                      <div className="mini-stat">
+                        <div className="card-label">Per employee</div>
+                        <div className="card-metric sm">
+                          {insights.intensity.per_employee ?? "—"}
+                          <span>t</span>
+                        </div>
+                      </div>
+                      <div className="mini-stat">
+                        <div className="card-label">Per $M revenue</div>
+                        <div className="card-metric sm">
+                          {insights.intensity.per_revenue_m ?? "—"}
+                          <span>t</span>
+                        </div>
+                        {insights.intensity.vs_peer_pct != null && (
+                          <span className={`pill ${intensityBetter ? "on" : "off"}`}>
+                            {intensityBetter ? "" : "+"}
+                            {insights.intensity.vs_peer_pct}% vs peers
+                          </span>
+                        )}
+                      </div>
+                      {(!company.employee_count || !company.annual_revenue_m) && (
+                        <Link className="btn btn-secondary" to="/settings">
+                          Add headcount & revenue
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <Link className="btn btn-secondary" to="/settings">
+                      Complete company profile
+                    </Link>
+                  )}
                 </div>
               )}
 
               {seg === "trajectory" && (
-                <div className="insight-list" style={{ marginTop: 12 }}>
+                <div className="insight-list">
                   {(insights?.headlines || []).slice(0, 4).map((h) => (
                     <div className="insight-item" key={h}>
                       <span className="dot" />
@@ -291,36 +325,48 @@ export function DashboardPage() {
               )}
 
               {seg === "actions" && (
-                <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+                <div className="side-stack">
                   {(insights?.roadmap.actions || []).slice(0, 3).map((a) => (
-                    <div className="roadmap-card" key={a.id} style={{ background: "rgba(255,255,255,0.03)" }}>
+                    <div className="roadmap-card" key={a.id}>
                       <div className="meta">
                         <span className={`scope-tag s${a.scope}`}>S{a.scope}</span>
                         <span className={`pill ${a.priority === "high" ? "off" : "warn"}`}>
                           {a.priority}
                         </span>
                       </div>
-                      <strong style={{ fontWeight: 500 }}>{a.title}</strong>
-                      <p>~{fmtShort(a.impact_t)} t · {a.owner}</p>
+                      <strong>{a.title}</strong>
+                      <p>
+                        ~{fmtShort(a.impact_t)} t · {a.owner}
+                      </p>
                     </div>
                   ))}
+                  <Link className="btn btn-secondary" to="/roadmap">
+                    Full roadmap
+                  </Link>
                 </div>
               )}
+            </div>
 
-              <div className="side-actions">
-                <button className="btn btn-primary" type="button" onClick={download} disabled={pdfBusy}>
-                  {pdfBusy ? "…" : "Export PDF"}
-                </button>
-                <Link className="btn btn-secondary" to="/simulator">
-                  Simulate
-                </Link>
-                <button className="side-fab" type="button" onClick={() => navigate("/roadmap")} title="Roadmap">
-                  →
-                </button>
-              </div>
+            <div className="side-actions">
+              <button className="btn btn-primary" type="button" onClick={download} disabled={pdfBusy}>
+                {pdfBusy ? "Preparing…" : "Export PDF"}
+              </button>
+              <Link className="btn btn-secondary" to="/simulator">
+                Simulate
+              </Link>
+              <button
+                className="side-fab"
+                type="button"
+                onClick={() => navigate("/roadmap")}
+                title="Roadmap"
+                aria-label="Open roadmap"
+              >
+                →
+              </button>
             </div>
           </aside>
         </div>
+        </>
       )}
     </>
   );
